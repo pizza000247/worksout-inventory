@@ -1,0 +1,149 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>WORKSOUT 재고실사 · v11 · 모바일 간편 배치</title><style>
+:root{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo',sans-serif;color:#15223a;background:#f2f5fa}*{box-sizing:border-box}body{margin:0;padding:14px 12px 80px;max-width:760px;margin:auto}h1{font-size:23px;margin:12px 0 4px}h2{font-size:18px;margin:0 0 14px}.muted{color:#697890;font-size:13px}.card{background:white;border-radius:18px;padding:17px;margin:13px 0;box-shadow:0 1px 3px #0000000c}button,.filelabel{border:0;border-radius:11px;background:#315fdb;color:white;font-size:15px;font-weight:700;padding:12px 14px;cursor:pointer;display:inline-block}button.secondary{background:#e7ecf7;color:#254274}button.danger{background:#fbe5e5;color:#9c2929}button:disabled{opacity:.45}input,select{font-size:16px;border:1px solid #cdd5e3;border-radius:10px;padding:12px;width:100%;background:white}input[type=file]{font-size:13px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#f0f4fb;border-radius:13px;padding:12px 8px}.stat small{display:block;color:#66758c;font-size:12px}.stat strong{font-size:24px}.item{border:1px solid #dfe5ef;border-radius:13px;padding:12px;margin:9px 0}.item .name{font-weight:750;font-size:16px}.meta{font-size:13px;color:#5d6b80;margin-top:5px;overflow-wrap:anywhere}.quant{display:flex;gap:13px;flex-wrap:wrap;font-size:14px;margin-top:10px}.pill{font-size:12px;padding:4px 7px;border-radius:6px;font-weight:700}.ok{color:#087b4b;background:#e0f5e8}.warn{color:#a05b00;background:#fff1d8}.bad{color:#b02020;background:#ffe7e7}.bar{height:6px;background:#e8edf5;border-radius:10px;margin-top:9px;overflow:hidden}.bar>div{height:100%;background:#3779e7}.locnav{display:flex;gap:8px}.locnav button{flex:1}#scan{font-size:20px;font-weight:700;letter-spacing:.5px}#message{min-height:22px;color:#0b7c5d;font-size:13px;margin-top:9px}#locTitle{font-size:28px;font-weight:800}#targetList{max-height:58vh;overflow:auto}#status{font-size:13px;white-space:pre-line}.smallbtn{padding:8px 10px;font-size:13px}.history-ok{border-left:5px solid #15996b}.history-other{border-left:5px solid #e6a23c}.history-unknown{border-left:5px solid #d94b4b}.history-title{font-size:15px;font-weight:750;line-height:1.45}.history-meta{font-size:12px;color:#58687c;overflow-wrap:anywhere;margin-top:4px}.history-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:5px}label{font-size:13px;color:#566780;display:block;margin:9px 0 5px}.focus{outline:3px solid #b4cafa}#loadNote{font-size:12px;color:#697890}.mode-on{background:#1648a7!important;color:white!important;box-shadow:inset 0 0 0 2px #103b89}.mode-off{background:#e8edf6!important;color:#415471!important}.mode-note{font-size:12px;color:#536580;margin:7px 0 0}.bulkbox{border:2px solid #b9c9e8;background:#f4f7ff;border-radius:13px;padding:12px;margin-bottom:12px}.bulkhead{display:flex;align-items:center;justify-content:space-between;gap:8px}.bulkhead .pill{white-space:nowrap}.bulkbox label{margin-top:8px}
+/* Mobile-first scan layout: keep location, scan and products together. */
+.scanpanel{margin:14px 0 18px;padding:13px 11px 11px;background:#f5f8ff;border:1px solid #dbe4f4;border-radius:14px}
+.scanpanel h2{font-size:17px;margin:0 0 10px}
+.scanpanel #scan{background:white}
+.scanpanel .row button{padding:10px 9px;font-size:13px}
+.scanpanel #message{font-size:12px;margin:7px 0 9px;min-height:16px}
+.scanpanel .bulkbox{padding:9px 10px;margin:9px 0 0;background:white;border:1px solid #dbe4f4;border-radius:10px}
+.scanpanel .bulkhead strong{font-size:13px}
+.scanpanel .bulkhead .pill{font-size:11px;padding:3px 6px}
+.scanpanel .bulkbox .row{display:flex;flex-wrap:nowrap;align-items:end;gap:6px;margin-top:7px}
+.scanpanel .bulkbox .row>div{flex:0 1 92px;min-width:0}
+.scanpanel .bulkbox label{font-size:11px;margin:0 0 4px}
+.scanpanel #bulkQty{font-size:16px;padding:9px 6px;min-width:0}
+.scanpanel #bulkApply{flex:1 1 auto;min-width:0;white-space:nowrap}
+.scanpanel #bulkReset{flex:0 0 auto;white-space:nowrap}
+.scanpanel .bulkhelp{font-size:11px;color:#697890;margin:7px 0 0;line-height:1.45}
+.productsTitle{font-size:16px;margin:16px 0 10px}
+@media(max-width:390px){.scanpanel{padding:10px 8px}.scanpanel .bulkbox{padding:8px}.scanpanel .row button{font-size:12px;padding:10px 7px}.scanpanel .bulkbox .row>div{flex-basis:78px}}
+</style></head><body>
+<h1>📦 WORKSOUT 재고실사</h1><p class="muted">INFORMATION 기준 · 품명 / 품번 / 색상 / 사이즈 확인</p>
+<section class="card"><h2>① 전산재고 불러오기</h2><input id="file" type="file" accept=".xlsx,.xls,.csv"><p id="loadNote">엑셀 파일을 선택하면 INFORMATION 시트를 자동으로 읽습니다. 이전 스캔 기록은 같은 웹주소의 브라우저에서 자동 복원됩니다. XLSX 해석에는 인터넷 연결이 필요합니다.</p><div class="row"><button id="load">재고 불러오기</button></div><p id="status"></p></section>
+<section class="card"><h2>② 실사 위치와 대상 목록</h2><div class="row"><div><div class="muted">현재 로케이션</div><div id="locTitle">미선택</div></div><div style="text-align:right"><span class="muted" id="locProgress"></span></div></div><div class="row" style="margin-top:10px"><button class="secondary" id="prev">◀ 이전</button><select id="locSelect"><option value="">로케이션 선택</option></select><button class="secondary" id="next">다음 ▶</button></div><div class="row" style="margin-top:10px"><button class="secondary" id="nextUnscanned" type="button">⏭ 다음 미실사 로케이션</button></div><div id="locationSummary" class="mode-note" aria-live="polite">전산재고를 불러오면 로케이션 진행상태가 표시됩니다.</div><div class="statgrid" style="margin-top:13px"><div class="stat"><small>전산수량</small><strong id="expected">0</strong></div><div class="stat"><small>실사수량</small><strong id="actual">0</strong></div><div class="stat"><small>부족수량</small><strong id="missing">0</strong></div></div><div class="scanpanel"><h2>③ 연속 스캔</h2><input id="scan" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="none" placeholder="상품 바코드 연속 스캔"><div class="row" style="margin-top:10px"><button id="focus">스캔 시작 / 입력창 선택</button><button class="secondary" id="undo">마지막 스캔 취소</button></div><div id="message" role="status">로케이션 선택 후 스캔 시작을 눌러주세요.</div><div class="bulkbox"><div class="bulkhead"><strong>📦 대량 수량 입력</strong><span id="bulkState" class="pill ok">일반 스캔 · 1개</span></div><div class="row"><div style="flex:1"><label for="bulkQty">수량 (1~5000)</label><input id="bulkQty" type="number" inputmode="numeric" min="1" max="5000" step="1" value="1"></div><button id="bulkApply" type="button" style="flex:1;align-self:end">수량 적용</button><button id="bulkReset" type="button" class="secondary" style="flex:0 0 auto;align-self:end">1개로</button></div><p class="bulkhelp">수량 적용 후 1회 스캔하면 지정 수량만큼 기록됩니다. 다음 스캔은 1개로 복귀합니다.</p></div></div><h2 class="productsTitle">④ 실사 대상 상품</h2><div class="row" style="margin-top:12px"><button id="showAll" class="secondary smallbtn">전체 상품</button><button id="showMissing" class="secondary smallbtn">미완료만</button></div><p id="targetModeNote" class="mode-note"></p><div id="targetList"><p class="muted">엑셀을 불러오면 실사 대상 상품이 여기에 표시됩니다.</p></div></section>
+<section class="card"><h2>⑤ 스캔 기록 확인 · 중간 삭제</h2><p class="muted">현재 선택한 로케이션의 기록만 표시합니다. CSV 저장에는 모든 로케이션 기록이 포함됩니다. 스캔 기록마다 <b>품명·품번·색상·사이즈</b>를 표시합니다. 현재 로케이션 미등록, 다른 로케이션 등록도 구분합니다. 일반 스캔은 <b>1건씩 삭제</b>하고, 대량 입력은 <b>묶음 전체를 한 번에 삭제</b>할 수 있습니다. 같은 바코드를 여러 번 찍었어도 선택한 1건만 지워집니다. 삭제를 누른 뒤 화면 안의 <b>삭제 확정</b>을 누르면 수량과 CSV 원본도 자동 반영됩니다. (아이폰 팝업 확인창을 사용하지 않습니다.)</p><div class="row"><button id="showHistory" class="secondary smallbtn">최근 30건</button><button id="showHistoryAll" class="secondary smallbtn">전체 기록</button></div><p id="historyModeNote" class="mode-note"></p><div id="history" style="max-height:380px;overflow:auto;margin-top:10px"></div></section>
+<section class="card"><h2>⑥ 저장 및 복구</h2><div class="row"><button id="saveCompare">실사 비교 CSV 저장</button><button class="secondary" id="saveRaw">스캔 원본 CSV 저장</button></div><div class="row" style="margin-top:9px"><button class="secondary" id="savePaste">엑셀 B열 붙여넣기용 CSV</button></div><div class="row" style="margin-top:9px"><button class="secondary" id="saveBackup">백업 JSON 저장</button><button class="secondary" id="importBackup">백업 복원</button><input id="backupFile" type="file" accept=".json" style="display:none"></div><button class="danger" id="clear" style="margin-top:9px">스캔 기록 초기화</button><p class="muted">중간 기록을 삭제하면 내보내기 CSV에도 해당 상품 스캔이 제외되며, 필요한 로케이션 코드는 남은 상품 스캔 순서에 따라 다시 자동 삽입됩니다. 스캔 원본 CSV는 스캔일시/스캔로그 2열로 저장되며, 첫 상품 앞에 로케이션을 자동 추가합니다. 붙여넣기용 CSV는 한 열만 저장됩니다. 스캔 기록은 현재 브라우저에 임시 저장됩니다. 다른 기기나 브라우저로 자동 동기화되지 않으므로 CSV 또는 JSON 백업을 자주 저장하세요.</p></section>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id), KEY='wr10_inventory_scans_v3';
+let records=[], locs=[], byLoc=new Map(), loc='', scans=[], lastScan=null, timer=null, filter='all', loading=false, historyAll=false, pendingDelete=-1, armedQty=1, batchSeq=0;
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=v=>String(v??'').trim().replace(/\.0$/,'');
+const barcodeKey=v=>norm(v).toUpperCase();
+const normalizeScan=s=>({...s,loc:barcodeKey(s.loc),barcode:barcodeKey(s.barcode)});
+const num=v=>{let n=Number(String(v??'0').replace(/,/g,''));return Number.isFinite(n)?n:0};
+const setMsg=(s,error=false)=>{$('message').textContent=s;$('message').style.color=error?'#b02020':'#087b4b'};
+function persist(){try{localStorage.setItem(KEY,JSON.stringify({scans,loc,version:5}))}catch(e){setMsg('저장 공간이 부족합니다. 즉시 CSV 백업하세요.',true)}}
+function restore(){try{let v=JSON.parse(localStorage.getItem(KEY)||'{}');scans=Array.isArray(v.scans)?v.scans.filter(x=>x&&x.loc&&x.barcode).map(normalizeScan):[];loc=barcodeKey(v.loc||'');setMsg('저장된 스캔 기록 '+scans.length+'건을 복원했습니다.')}catch(e){scans=[];setMsg('기록 복원에 실패했습니다.',true)}render()}
+function csvRows(text){let out=[],row=[],cell='',q=false;for(let i=0;i<text.length;i++){let c=text[i];if(q){if(c==='"'&&text[i+1]==='"'){cell+='"';i++}else if(c==='"')q=false;else cell+=c}else if(c==='"')q=true;else if(c===','){row.push(cell);cell=''}else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cell);if(row.some(x=>x!==''))out.push(row);row=[];cell=''}else cell+=c}row.push(cell);if(row.some(x=>x!==''))out.push(row);return out}
+function readFile(f){return new Promise((resolve,reject)=>{let reader=new FileReader();reader.onerror=()=>reject(Error('파일 읽기 실패'));reader.onload=()=>{try{if(/\.csv$/i.test(f.name)){let t=reader.result;let lines=csvRows(t);resolve(lines)}else{if(typeof XLSX==='undefined')throw Error('엑셀 해석 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하거나 INFORMATION 시트를 CSV로 저장해 주세요.');let wb=XLSX.read(reader.result,{type:'array',raw:true});let sn=wb.SheetNames.find(x=>x.toUpperCase()==='INFORMATION')||wb.SheetNames[0];resolve(XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:'',raw:true}))}}catch(e){reject(e)}};if(/\.csv$/i.test(f.name))reader.readAsText(f,'utf-8');else reader.readAsArrayBuffer(f)})}
+function parseData(rows){let headerIndex=rows.findIndex(r=>r.some(c=>/^(BARCODE|바코드)$/i.test(norm(c)))&&r.some(c=>norm(c)==='로케이션'));if(headerIndex<0)throw Error('바코드와 로케이션 열을 찾지 못했습니다. INFORMATION 시트의 2행 제목을 확인해 주세요.');let h=rows[headerIndex].map(norm),col=(...names)=>h.findIndex(x=>names.includes(x.toUpperCase())||names.includes(x));let ix={barcode:col('BARCODE','바코드'),loc:col('로케이션'),name:col('품명','스타일명'),style:col('품번','스타일코드'),color:col('색상'),size:col('사이즈'),qty:col('전산수량','수량')};if(ix.barcode<0||ix.loc<0||ix.qty<0)throw Error('필수 열(바코드/로케이션/전산수량)을 찾지 못했습니다.');let map=new Map();for(let i=headerIndex+1;i<rows.length;i++){let r=rows[i],l=barcodeKey(r[ix.loc]),b=barcodeKey(r[ix.barcode]);if(!l||!b||l==='-'||b==='-')continue;let k=l+'\u0001'+b;let o=map.get(k);if(o)o.qty+=num(r[ix.qty]);else map.set(k,{loc:l,barcode:b,name:ix.name>=0?norm(r[ix.name]):'',style:ix.style>=0?norm(r[ix.style]):'',color:ix.color>=0?norm(r[ix.color]):'',size:ix.size>=0?norm(r[ix.size]):'',qty:num(r[ix.qty])})}return [...map.values()]}
+function build(){byLoc=new Map();for(let r of records){if(!byLoc.has(r.loc))byLoc.set(r.loc,[]);byLoc.get(r.loc).push(r)}locs=[...byLoc.keys()];$('locSelect').innerHTML='<option value="">로케이션 선택</option>'+locs.map(l=>'<option value="'+esc(l)+'">'+esc(l)+'</option>').join('');if(!byLoc.has(loc))loc=locs[0]||'';render()}
+function countMap(){let m=new Map();for(let s of scans){let k=s.loc+'\u0001'+s.barcode;m.set(k,(m.get(k)||0)+1)}return m}
+function locationStats(){
+ const actualByLoc=new Map();const scannedByKey=countMap();
+ for(const s of scans)actualByLoc.set(s.loc,(actualByLoc.get(s.loc)||0)+1);
+ const statuses=new Map();const totals={unscanned:0,progress:0,complete:0,excess:0};
+ for(const l of locs){
+  const rs=byLoc.get(l)||[];const n=actualByLoc.get(l)||0;
+  let exact=true,hasExcess=false;
+  for(const r of rs){const count=scannedByKey.get(l+'\u0001'+r.barcode)||0;if(count!==r.qty)exact=false;if(count>r.qty)hasExcess=true}
+  for(const [key,count] of scannedByKey){if(key.startsWith(l+'\u0001')&&!rs.some(r=>r.barcode===key.slice(l.length+1))){exact=false;hasExcess=true}}
+  const status=n===0?'unscanned':hasExcess?'excess':exact?'complete':'progress';
+  statuses.set(l,status);totals[status]++;
+ }
+ return {statuses,totals};
+}
+function renderLocationProgress(){
+ const {statuses,totals}=locationStats();
+ const names={unscanned:'미실사',progress:'진행중',complete:'완료',excess:'초과'};
+ $('locationSummary').textContent='전체 '+locs.length+'개 · 미실사 '+totals.unscanned+' · 진행중 '+totals.progress+' · 완료 '+totals.complete+' · 초과 '+totals.excess;
+ const select=$('locSelect');const old=select.value;
+ select.innerHTML='<option value="">로케이션 선택</option>'+locs.map(l=>'<option value="'+esc(l)+'">'+esc(l)+' ['+names[statuses.get(l)]+']</option>').join('');
+ select.value=byLoc.has(loc)?loc:'';
+ $('nextUnscanned').disabled=!locs.length||totals.unscanned===0;
+}
+function changeLoc(l){if(!l)return;loc=l;persist();render();setMsg('현재 로케이션: '+l)}
+function render(){renderLocationProgress();renderHistory();$('showAll').className='smallbtn '+(filter==='all'?'mode-on':'mode-off');$('showMissing').className='smallbtn '+(filter==='missing'?'mode-on':'mode-off');$('targetModeNote').textContent=filter==='all'?'전체 상품을 표시 중':'미완료·초과·미등록 상품만 표시 중';let rs=byLoc.get(loc)||[], counts=countMap();$('locTitle').textContent=loc||'미선택';$('locSelect').value=byLoc.has(loc)?loc:'';let index=locs.indexOf(loc);$('locProgress').textContent=locs.length?(index+1)+' / '+locs.length+' 로케이션':'';let exp=rs.reduce((a,r)=>a+r.qty,0),actual=0,missing=0,completed=0;for(let r of rs){let n=counts.get(r.loc+'\u0001'+r.barcode)||0;actual+=n;missing+=Math.max(0,r.qty-n);if(n>=r.qty)completed++}let extras=[];for(let [k,n] of counts){let [l,b]=k.split('\u0001');if(l===loc&&!rs.some(r=>r.barcode===b)){extras.push({loc:l,barcode:b,name:'전산 미등록 상품',style:'',color:'',size:'',qty:0,extra:n});actual+=n}}$('expected').textContent=exp.toLocaleString();$('actual').textContent=actual.toLocaleString();$('missing').textContent=missing.toLocaleString();let visible=[...rs,...extras].filter(r=>{if(filter==='all')return true;if(r.extra!==undefined)return true;const scanned=counts.get(r.loc+'\u0001'+r.barcode)||0;return scanned!==r.qty;});let html='<p class="muted">상품 '+rs.length+'종 · 완료 '+completed+'종 · 미등록 '+extras.length+'종</p>';if(!rs.length&&!extras.length)html+='<p class="muted">선택된 로케이션의 상품이 없습니다. 엑셀을 불러오거나 로케이션을 선택하세요.</p>';for(let r of visible){let n=r.extra??(counts.get(r.loc+'\u0001'+r.barcode)||0),diff=n-r.qty,status=r.extra?'미등록':n===r.qty?'완료':n>r.qty?'초과':'부족';html+='<div class="item"><div class="row" style="align-items:start"><div style="flex:4;min-width:0"><div class="name">'+esc(r.name||'상품명 없음')+'</div><div class="meta">'+esc(r.style||'-')+' · '+esc(r.color||'-')+' · '+esc(r.size||'-')+'</div><div class="meta">'+esc(r.barcode)+'</div></div><div style="flex:0 0 auto"><span class="pill '+(status==='완료'?'ok':status==='부족'?'warn':'bad')+'">'+status+'</span></div></div><div class="quant"><span>전산 <b>'+r.qty+'</b></span><span>실사 <b>'+n+'</b></span><span>차이 <b>'+diff+'</b></span></div><div class="bar"><div style="width:'+Math.min(100,r.qty?100*n/r.qty:100)+'%"></div></div></div>'} $('targetList').innerHTML=html}
+function getScanInfo(s){
+ let rs=byLoc.get(s.loc)||[];
+ let match=rs.find(r=>r.barcode===s.barcode);
+ if(match)return {kind:'ok',label:'현재 위치 등록',name:match.name||'상품명 없음',style:match.style,color:match.color,size:match.size};
+ let elsewhere=records.find(r=>r.barcode===s.barcode);
+ if(elsewhere)return {kind:'other',label:'다른 로케이션 등록',name:elsewhere.name||'상품명 없음',style:elsewhere.style,color:elsewhere.color,size:elsewhere.size};
+ return {kind:'unknown',label:records.length?'미등록 상품':'전산재고 미불러옴',name:records.length?'전산재고에 없는 바코드':'엑셀 불러오기 후 상품정보 표시',style:'',color:'',size:''};
+}
+function historyGroups(){
+ let groups=[];
+ for(let i=0;i<scans.length;i++){
+  const s=scans[i];if(s.loc!==loc)continue;
+  const prev=groups[groups.length-1];
+  if(s.batchId&&prev&&prev.batchId===s.batchId){prev.indices.push(i)}
+  else groups.push({s,indices:[i],batchId:s.batchId||null});
+ }
+ return groups;
+}
+function renderHistory(){
+ let root=$('history');if(!root)return;
+ let groups=historyGroups(),total=groups.reduce((n,g)=>n+g.indices.length,0);
+ if(!historyAll){let remaining=30,selected=[];for(let i=groups.length-1;i>=0&&remaining>0;i--){selected.unshift(groups[i]);remaining-=groups[i].indices.length}groups=selected}
+ groups.reverse();$('showHistory').className='smallbtn '+(!historyAll?'mode-on':'mode-off');$('showHistoryAll').className='smallbtn '+(historyAll?'mode-on':'mode-off');
+ $('historyModeNote').textContent=(loc||'로케이션 미선택')+' · '+(historyAll?'전체 '+total+'건':'최근 약 30건 / 총 '+total+'건')+' 표시 (대량 입력은 묶어서 표시)';
+ if(!groups.length){root.innerHTML='<p class="muted">이 로케이션의 스캔 기록이 없습니다.</p>';return}
+ root.innerHTML=groups.map(g=>{
+  const s=g.s,i=g.indices[0],qty=g.indices.length,info=getScanInfo(s),cls=info.kind==='ok'?'history-ok':info.kind==='other'?'history-other':'history-unknown';
+  const pill=info.kind==='ok'?'ok':info.kind==='other'?'warn':'bad';
+  const detail=info.kind==='unknown'?'':('<div class="history-meta">'+esc([info.style,info.color,info.size].filter(Boolean).join(' · ')||'품번·색상·사이즈 정보 없음')+'</div>');
+  return '<div class="item '+cls+'" style="margin:7px 0;padding:11px"><div class="row" style="flex-wrap:nowrap;align-items:center"><div style="flex:1;min-width:0"><div class="history-top"><span class="pill '+pill+'">'+esc(info.label)+'</span><span class="muted">#'+(i+1)+'</span>'+(g.batchId?'<span class="pill warn">대량 입력 '+qty+'건</span>':'')+'</div><div class="history-title">'+esc(info.name)+'</div>'+detail+'<div class="history-meta">바코드 '+esc(s.barcode)+'</div><div class="history-meta">스캔 위치 '+esc(s.loc)+' · '+esc(new Date(s.at).toLocaleString('ko-KR'))+'</div></div><button type="button" class="danger smallbtn" style="flex:0 0 auto" data-delete-index="'+i+'">'+(pendingDelete===i?'삭제 선택됨':'삭제')+'</button></div>'+(pendingDelete===i?'<div class="row" style="margin-top:9px;gap:8px"><span style="font-size:13px;color:#b02020;flex:1">'+(g.batchId?'대량 입력 '+qty+'건을 모두 삭제할까요?':'이 스캔 1건을 삭제할까요?')+'</span><button type="button" class="danger smallbtn" data-confirm-delete="'+i+'">삭제 확정</button><button type="button" class="secondary smallbtn" data-cancel-delete>취소</button></div>':'')+'</div>'
+ }).join('');
+}
+$('history').addEventListener('click',e=>{
+ const cancel=e.target.closest('[data-cancel-delete]');
+ if(cancel){pendingDelete=-1;renderHistory();return}
+ const confirmBtn=e.target.closest('[data-confirm-delete]');
+ if(confirmBtn){
+  const i=Number(confirmBtn.getAttribute('data-confirm-delete'));
+  if(!Number.isInteger(i)||i!==pendingDelete||i<0||i>=scans.length)return;
+  const s=scans[i],bid=s.batchId;
+  const removed=bid?scans.filter(x=>x.batchId===bid).length:1;
+  if(bid)scans=scans.filter(x=>x.batchId!==bid);else scans.splice(i,1);
+  pendingDelete=-1;lastScan=null;persist();render();setMsg('삭제 완료: '+s.loc+' / '+s.barcode+' · '+removed+'건 삭제, CSV 반영');return;
+ }
+ const btn=e.target.closest('[data-delete-index]');if(!btn)return;
+ const i=Number(btn.getAttribute('data-delete-index'));
+ if(!Number.isInteger(i)||i<0||i>=scans.length)return;
+ pendingDelete=i;renderHistory();
+});
+$('showHistory').onclick=()=>{historyAll=false;pendingDelete=-1;renderHistory()};$('showHistoryAll').onclick=()=>{historyAll=true;pendingDelete=-1;renderHistory()};
+function updateBulkUI(){let q=armedQty;$('bulkState').textContent=q>1?'다음 스캔 '+q+'개 적용':'일반 스캔 · 1개';$('bulkState').className='pill '+(q>1?'warn':'ok');$('bulkQty').value=String(q)}
+$('bulkApply').onclick=()=>{let q=Number($('bulkQty').value);if(!Number.isInteger(q)||q<1||q>5000){setMsg('수량은 1~5000 사이 정수로 입력해 주세요.',true);return}armedQty=q;updateBulkUI();setMsg(q===1?'일반 스캔 모드입니다.':'대량 수량 '+q+'개 설정 완료. 다음 상품 바코드를 한 번 스캔하세요.');$('scan').focus()};
+$('bulkReset').onclick=()=>{armedQty=1;updateBulkUI();setMsg('일반 스캔 1개 모드로 변경했습니다.');$('scan').focus()};
+function commit(raw){clearTimeout(timer);let b=barcodeKey(raw);$('scan').value='';if(!b)return;if(byLoc.has(b)){if(b===loc){setMsg('현재 로케이션 '+b+' 중복 스캔 무시 (상품 기록 없음)');$('scan').focus();return}if(confirm('다른 로케이션 '+b+'를 스캔했습니다. 현재 위치 '+loc+'에서 '+b+'로 변경할까요?'))changeLoc(b);else setMsg('로케이션 변경 취소: '+b);$('scan').focus();return}if(!loc){setMsg('로케이션을 먼저 스캔하거나 선택해 주세요.',true);return}if(!/^\d{8,}$/.test(b)&&!/^\w{8,}$/.test(b)){setMsg('알 수 없는 로케이션 또는 짧은 바코드: '+b,true);return}let qty=armedQty;armedQty=1;updateBulkUI();const at=new Date().toISOString();const bid=qty>1?'bulk_'+at+'_'+(++batchSeq):null;for(let j=0;j<qty;j++)scans.push({loc,barcode:b,at,...(bid?{batchId:bid}:{})});lastScan=scans[scans.length-1];pendingDelete=-1;persist();render();setMsg('기록 완료: '+loc+' / '+b+' × '+qty+'개 (총 '+scans.length+'건)');$('scan').focus()}
+function makeCSV(rows,name){let s='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');download(new Blob([s],{type:'text/csv;charset=utf-8'}),name)}
+function download(blob,name){let url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);setMsg('다운로드를 요청했습니다. 아이폰 다운로드 폴더에서 실제 파일을 확인해 주세요.')}
+function timestamp(){let d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
+$('load').onclick=async()=>{if(loading)return;let f=$('file').files[0];if(!f){alert('엑셀 파일을 선택해 주세요.');return}loading=true;$('load').disabled=true;$('status').textContent='불러오는 중...';try{let rows=await readFile(f);records=parseData(rows);if(!records.length)throw Error('유효한 재고 데이터가 없습니다.');build();$('status').textContent='전산재고 '+records.length.toLocaleString()+'종 / 로케이션 '+locs.length.toLocaleString()+'개 불러오기 완료. 기존 스캔 기록 '+scans.length+'건 유지.';setMsg('재고 불러오기 완료. 실사 위치를 선택해 주세요.')}catch(e){$('status').textContent='오류: '+e.message;setMsg(e.message,true)}finally{loading=false;$('load').disabled=false}};
+$('nextUnscanned').onclick=()=>{
+ if(!locs.length){setMsg('먼저 전산재고 파일을 불러와 주세요.',true);return}
+ const {statuses}=locationStats(),start=locs.indexOf(loc);
+ for(let step=1;step<=locs.length;step++){
+  const i=(Math.max(start,0)+step)%locs.length;
+  if(statuses.get(locs[i])==='unscanned'){
+   const wrapped=i<=start;changeLoc(locs[i]);setMsg('다음 미실사 로케이션: '+locs[i]+(wrapped?' (처음으로 돌아가 탐색)':''));return;
+  }
+ }
+ setMsg('미실사 로케이션이 없습니다. 진행중·초과 로케이션을 확인해 주세요.');
+};
+$('locSelect').onchange=e=>changeLoc(e.target.value);$('prev').onclick=()=>{let i=locs.indexOf(loc);if(i>0)changeLoc(locs[i-1])};$('next').onclick=()=>{let i=locs.indexOf(loc);if(i<locs.length-1)changeLoc(locs[i+1])};$('showAll').onclick=()=>{filter='all';render()};$('showMissing').onclick=()=>{filter='missing';render()};$('focus').onclick=()=>{$('scan').focus();setMsg('스캔 준비 완료')};
+$('scan').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();commit($('scan').value)}});$('scan').addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>commit($('scan').value),700)});$('undo').onclick=()=>{if(!scans.length){setMsg('취소할 기록이 없습니다.',true);return}let s=scans[scans.length-1],bid=s.batchId,removed=1;if(bid){removed=scans.filter(x=>x.batchId===bid).length;scans=scans.filter(x=>x.batchId!==bid)}else scans.pop();pendingDelete=-1;persist();render();setMsg('마지막 스캔 취소: '+s.loc+' / '+s.barcode+' ('+removed+'건)');$('scan').focus()};
+$('saveCompare').onclick=()=>{let counts=countMap(),rows=[['로케이션','바코드','품명','품번','색상','사이즈','전산수량','실사수량','차이','상태']];let known=new Set();for(let r of records){let k=r.loc+'\u0001'+r.barcode;known.add(k);let n=counts.get(k)||0;rows.push([r.loc,r.barcode,r.name,r.style,r.color,r.size,r.qty,n,n-r.qty,n===r.qty?'완료':n>r.qty?'초과':'부족'])}for(let [k,n] of counts)if(!known.has(k)){let [l,b]=k.split('\u0001');rows.push([l,b,'미등록','','','',0,n,n,'미등록'])}makeCSV(rows,timestamp()+'_실사비교.csv')};
+function rawLog(){let out=[],prev='';for(let s of scans){if(s.loc!==prev){out.push([s.at,s.loc]);prev=s.loc}out.push([s.at,s.barcode])}return out}
+$('saveRaw').onclick=()=>makeCSV([['스캔일시','스캔로그'],...rawLog()],timestamp()+'_스캔원본.csv');
+$('savePaste').onclick=()=>makeCSV(rawLog().map(r=>[r[1]]),timestamp()+'_엑셀B열_붙여넣기.csv');
+$('saveBackup').onclick=()=>download(new Blob([JSON.stringify({version:5,scans,loc,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'}),timestamp()+'_WR10_백업.json');$('importBackup').onclick=()=>$('backupFile').click();$('backupFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let v=JSON.parse(await f.text());if(!Array.isArray(v.scans))throw Error('스캔 기록이 없는 파일입니다.');if(!confirm('현재 스캔 기록을 백업 파일 내용으로 교체할까요?'))return;scans=v.scans.filter(x=>x&&x.loc&&x.barcode);loc=barcodeKey(v.loc||loc);persist();render();setMsg('백업 '+scans.length+'건 복원 완료')}catch(err){setMsg('백업 복원 실패: '+err.message,true)}e.target.value=''};
+$('clear').onclick=()=>{if(!confirm('현재 스캔 기록 '+scans.length+'건을 모두 삭제할까요? CSV/JSON 백업 후 진행하세요.'))return;scans=[];pendingDelete=-1;persist();render();setMsg('스캔 기록 초기화 완료')};restore();
+updateBulkUI();
+})();
+</script></body></html>
